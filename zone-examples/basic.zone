@@ -1,0 +1,76 @@
+; ─────────────────────────────────────────────────────────────────
+; Zone: lab.example.com
+; Purpose: Basic zone file for DNS labs
+; ─────────────────────────────────────────────────────────────────
+
+$ORIGIN lab.example.com.
+$TTL 3600
+
+; ── SOA ──────────────────────────────────────────────────────────
+; Required: exactly one SOA, at zone apex
+@  IN  SOA  ns1.lab.example.com.  hostmaster.lab.example.com. (
+       2024010101  ; serial   — increment every change (YYYYMMDDNN)
+       3600        ; refresh  — secondary polls primary every 1 hour
+       900         ; retry    — retry after 15 min if refresh fails
+       604800      ; expire   — secondary gives up after 7 days
+       300         ; minimum  — negative cache TTL (RFC 2308)
+   )
+
+; ── Nameservers ───────────────────────────────────────────────────
+; Required: at least 2 NS records at zone apex
+@     IN  NS   ns1.lab.example.com.
+@     IN  NS   ns2.lab.example.com.
+
+; ── Nameserver A records (in-zone nameservers need glue) ──────────
+ns1   IN  A    192.0.2.1
+ns1   IN  AAAA 2001:db8::1
+ns2   IN  A    192.0.2.2
+ns2   IN  AAAA 2001:db8::2
+
+; ── Zone apex ─────────────────────────────────────────────────────
+@     IN  A    192.0.2.10
+@     IN  AAAA 2001:db8::10
+
+; ── Web servers ───────────────────────────────────────────────────
+www   IN  A    192.0.2.10
+www   IN  AAAA 2001:db8::10
+www   IN  A    192.0.2.11     ; round-robin: two A records
+
+; ── Mail ─────────────────────────────────────────────────────────
+@     IN  MX   10  mail1.lab.example.com.
+@     IN  MX   20  mail2.lab.example.com.
+mail1 IN  A    192.0.2.20
+mail2 IN  A    192.0.2.21
+
+; ── Aliases ───────────────────────────────────────────────────────
+ftp   IN  CNAME www.lab.example.com.    ; ftp → www
+blog  IN  CNAME www.lab.example.com.
+
+; ── TXT Records ───────────────────────────────────────────────────
+@     IN  TXT   "v=spf1 ip4:192.0.2.0/24 -all"
+@     IN  TXT   "lab-verification=abc123"
+
+; ── SSH Fingerprint ───────────────────────────────────────────────
+www   IN  SSHFP  1  1  <sha1-fingerprint>    ; RSA/SHA-1
+www   IN  SSHFP  1  2  <sha256-fingerprint>  ; RSA/SHA-256
+www   IN  SSHFP  4  2  <sha256-fingerprint>  ; Ed25519/SHA-256
+
+; ── Service Records ───────────────────────────────────────────────
+_http._tcp    IN  SRV   0  0  80   www.lab.example.com.
+_https._tcp   IN  SRV   0  0  443  www.lab.example.com.
+
+; ── CAA ───────────────────────────────────────────────────────────
+@     IN  CAA   0  issue      "letsencrypt.org"
+@     IN  CAA   0  issuewild  ";"   ; no wildcard certs
+@     IN  CAA   0  iodef      "mailto:security@lab.example.com"
+
+; ── Wildcard ──────────────────────────────────────────────────────
+*     IN  A    192.0.2.10    ; catch-all for undefined subdomains
+
+; ── Subdomain delegation ──────────────────────────────────────────
+; dev.lab.example.com is delegated to its own nameservers
+dev   IN  NS   ns1.dev.lab.example.com.
+dev   IN  NS   ns2.dev.lab.example.com.
+; Glue records (required since NS is within delegated zone):
+ns1.dev  IN  A  10.0.1.1
+ns2.dev  IN  A  10.0.1.2

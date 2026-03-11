@@ -1,0 +1,24 @@
+; ─────────────────────────────────────────────────────────────────
+; Split-Horizon: EXTERNAL view
+; Returns public addresses for external clients
+; ─────────────────────────────────────────────────────────────────
+
+$ORIGIN lab.example.com.
+$TTL 3600
+
+@  IN  SOA  ns1.lab.example.com.  hostmaster.lab.example.com. (
+       2024010101 3600 900 604800 300 )
+
+@     IN  NS   ns1.lab.example.com.
+@     IN  NS   ns2.lab.example.com.
+ns1   IN  A    203.0.113.1
+ns2   IN  A    203.0.113.2
+
+; External addresses — public IPs only
+@     IN  A    203.0.113.10    ; public: apex
+www   IN  A    203.0.113.10    ; public web (load balancer)
+www   IN  A    203.0.113.11    ; round-robin
+mail  IN  A    203.0.113.20    ; public MX
+
+; Note: NO db, dev, or vpn records in external view
+; External clients have no way to know these exist

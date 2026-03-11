@@ -1,0 +1,24 @@
+; ─────────────────────────────────────────────────────────────────
+; Split-Horizon: INTERNAL view
+; Returns RFC 1918 addresses for internal clients
+; ─────────────────────────────────────────────────────────────────
+
+$ORIGIN lab.example.com.
+$TTL 3600
+
+@  IN  SOA  ns1.lab.example.com.  hostmaster.lab.example.com. (
+       2024010101 3600 900 604800 300 )
+
+@     IN  NS   ns1.lab.example.com.
+ns1   IN  A    10.0.0.1
+
+; Internal addresses — private IPs
+@     IN  A    10.0.0.10       ; internal: apex
+www   IN  A    10.0.0.10       ; internal web server
+mail  IN  A    10.0.0.20       ; internal mail server
+db    IN  A    10.0.0.30       ; database (only internal!)
+dev   IN  A    10.0.0.40       ; dev server (only internal!)
+vpn   IN  A    10.0.0.1        ; VPN endpoint (only internal!)
+
+; Internal-only TXT
+@     IN  TXT  "internal-network=true"

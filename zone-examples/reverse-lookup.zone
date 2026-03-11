@@ -1,0 +1,26 @@
+; ─────────────────────────────────────────────────────────────────
+; Reverse zone for 192.0.2.0/24
+; Zone name: 2.0.192.in-addr.arpa.
+; ─────────────────────────────────────────────────────────────────
+
+$ORIGIN 2.0.192.in-addr.arpa.
+$TTL 3600
+
+@  IN  SOA  ns1.lab.example.com.  hostmaster.lab.example.com. (
+       2024010101
+       3600
+       900
+       604800
+       300
+   )
+
+@    IN  NS   ns1.lab.example.com.
+@    IN  NS   ns2.lab.example.com.
+
+; PTR records — reverse octets of last octet
+1    IN  PTR  ns1.lab.example.com.
+2    IN  PTR  ns2.lab.example.com.
+10   IN  PTR  www.lab.example.com.
+11   IN  PTR  www2.lab.example.com.
+20   IN  PTR  mail1.lab.example.com.
+21   IN  PTR  mail2.lab.example.com.
